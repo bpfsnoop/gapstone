@@ -29,7 +29,7 @@ type Errno int
 func (e Errno) Error() string {
 	s := C.GoString(C.cs_strerror(C.cs_err(e)))
 	if s == "" {
-		return fmt.Sprintf("Internal Error: No Error string for Errno %v", e)
+		return fmt.Sprintf("Internal Error: No Error string for Errno %d", e)
 	}
 	return s
 }
@@ -110,7 +110,6 @@ type Instruction struct {
 
 // Called by the arch specific decomposers
 func fillGenericHeader(e *Engine, raw C.cs_insn, insn *Instruction) {
-
 	insn.Id = uint(raw.id)
 	insn.Address = uint(raw.address)
 	insn.Size = uint(raw.size)
@@ -161,7 +160,6 @@ func fillGenericHeader(e *Engine, raw C.cs_insn, insn *Instruction) {
 			}
 		}
 	}
-
 }
 
 // Close the underlying C handle and resources used by this Engine
@@ -242,12 +240,11 @@ func (e *Engine) SetOption(ty, value uint) error {
 }
 
 // Disassemble a []byte full of opcodes.
-//   * address - Address of the first instruction in the given code buffer.
-//   * count - Number of instructions to disassemble, 0 to disassemble the whole []byte
+//   - address - Address of the first instruction in the given code buffer.
+//   - count - Number of instructions to disassemble, 0 to disassemble the whole []byte
 //
 // Underlying C resources are automatically free'd by this function.
 func (e *Engine) Disasm(input []byte, address, count uint64) ([]Instruction, error) {
-
 	var insn *C.cs_insn
 	bptr := (*C.uint8_t)(unsafe.Pointer(&input[0]))
 	disassembled := C.cs_disasm(
@@ -323,7 +320,6 @@ type cbWrapper struct {
 // of the SkipDataConfig options, although UserData without a Callback will be
 // ignored.
 func (e *Engine) SkipDataStart(config *SkipDataConfig) {
-
 	if config != nil {
 
 		e.skipdata = &C.cs_opt_skipdata{}
