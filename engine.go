@@ -29,7 +29,7 @@ type Errno int
 func (e Errno) Error() string {
 	s := C.GoString(C.cs_strerror(C.cs_err(e)))
 	if s == "" {
-		return fmt.Sprintf("Internal Error: No Error string for Errno %v", e)
+		return fmt.Sprintf("Internal Error: No Error string for Errno %d", e)
 	}
 	return s
 }
