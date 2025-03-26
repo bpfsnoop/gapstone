@@ -39,7 +39,6 @@ type Arm64Shifter struct {
 type Arm64Operand struct {
 	VectorIndex int
 	Vas         int
-	Vess        int
 	Shift       Arm64Shifter
 	Ext         uint
 	Type        uint // ARM64_OP_* - determines which field is set below
@@ -72,7 +71,6 @@ func (insn Arm64Instruction) OpCount(optype uint) int {
 }
 
 func fillArm64Header(raw C.cs_insn, insn *Instruction) {
-
 	if raw.detail == nil {
 		return
 	}
@@ -109,7 +107,6 @@ func fillArm64Header(raw C.cs_insn, insn *Instruction) {
 			Ext:         uint(cop.ext),
 			VectorIndex: int(cop.vector_index),
 			Vas:         int(cop.vas),
-			Vess:        int(cop.vess),
 			Access:      uint(cop.access),
 		}
 

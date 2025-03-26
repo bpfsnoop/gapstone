@@ -458,7 +458,7 @@ Disasm:
 		operands[0].access: WRITE
 		operands[1].type: REG = s1
 		operands[1].access: READ
-	Vector-data: 17
+	Vector-data: 18
 	Registers read: s1
 	Registers modified: d3
 

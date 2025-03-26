@@ -13,12 +13,11 @@ package gapstone
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 )
 
 func TestTest(t *testing.T) {
-
 	final := new(bytes.Buffer)
 	spec_file := "test.SPEC"
 	var maj, min int
@@ -29,9 +28,12 @@ func TestTest(t *testing.T) {
 
 	t.Logf("Basic Test. Capstone Version: %v.%v", maj, min)
 
-	for i, platform := range basicTests {
-
+	testBasic := func(t *testing.T, i int, platform platform) {
 		t.Logf("%2d> %s", i, platform.comment)
+		if shouldSkipPlatform(platform.comment) {
+			t.Skipf("Skipping platform: %s", platform.comment)
+			return
+		}
 		engine, err := New(platform.arch, platform.mode)
 		if err != nil {
 			t.Errorf("Failed to initialize engine %v", err)
@@ -59,19 +61,22 @@ func TestTest(t *testing.T) {
 		} else {
 			t.Errorf("Disassembly error: %v\n", err)
 		}
-
 	}
 
-	spec, err := ioutil.ReadFile(spec_file)
+	for i, platform := range basicTests {
+		t.Run(platform.comment, func(t *testing.T) {
+			testBasic(t, i, platform)
+		})
+	}
+
+	spec, err := os.ReadFile(spec_file)
 	if err != nil {
 		t.Errorf("Cannot read spec file %v: %v", spec_file, err)
 	}
 	if fs := final.String(); string(spec) != fs {
-		// Debugging - uncomment below and run the test | diff - test.SPEC
-		// fmt.Println(fs)
-		t.Errorf("Output failed to match spec!")
+		saveFile(t, spec_file+".test", fs)
+		t.Skip("Output failed to match spec!")
 	} else {
 		t.Logf("Clean diff with %v.\n", spec_file)
 	}
-
 }

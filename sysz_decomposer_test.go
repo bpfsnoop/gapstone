@@ -13,12 +13,11 @@ package gapstone
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 )
 
 func sysZInsnDetail(insn Instruction, engine *Engine, buf *bytes.Buffer) {
-
 	if len(insn.SysZ.Operands) > 0 {
 		fmt.Fprintf(buf, "\top_count: %v\n", len(insn.SysZ.Operands))
 	}
@@ -48,7 +47,6 @@ func sysZInsnDetail(insn Instruction, engine *Engine, buf *bytes.Buffer) {
 				fmt.Fprintf(buf, "\t\t\toperands[%v].mem.disp: 0x%x\n", i, uint64(op.Mem.Disp))
 			}
 		}
-
 	}
 
 	if insn.SysZ.CC != 0 {
@@ -59,13 +57,11 @@ func sysZInsnDetail(insn Instruction, engine *Engine, buf *bytes.Buffer) {
 }
 
 func TestSysZ(t *testing.T) {
-
 	t.Parallel()
 
 	final := new(bytes.Buffer)
 	spec_file := "sysZ.SPEC"
-	for i, platform := range sysZTests {
-
+	testSysZ := func(t *testing.T, i int, platform platform) {
 		engine, err := New(platform.arch, platform.mode)
 		if err != nil {
 			t.Errorf("Failed to initialize engine %v", err)
@@ -80,13 +76,10 @@ func TestSysZ(t *testing.T) {
 			maj, min := engine.Version()
 			t.Logf("Arch: SystemZ. Capstone Version: %v.%v", maj, min)
 			check := checks[CS_ARCH_SYSZ]
-			if check.grpMax != SYSZ_GRP_ENDING ||
-				check.insMax != SYSZ_INS_ENDING ||
-				check.regMax != SYSZ_REG_ENDING {
-				t.Errorf("Failed in sanity check. Constants out of sync with core.")
-			} else {
-				t.Logf("Sanity Check: PASS")
-			}
+			passed := assertEqual(t, "Failed in sanity GRP check, exp %d, got %d", check.grpMax, SYSZ_GRP_ENDING)
+			passed = assertEqual(t, "Failed in sanity INS check, exp %d, got %d", check.insMax, SYSZ_INS_ENDING) && passed
+			passed = assertEqual(t, "Failed in sanity REG check, exp %d, got %d", check.regMax, SYSZ_REG_ENDING) && passed
+			t.Logf("Sanity Check PASS: %v", passed)
 		}
 
 		insns, err := engine.Disasm([]byte(platform.code), address, 0)
@@ -105,19 +98,23 @@ func TestSysZ(t *testing.T) {
 		} else {
 			t.Errorf("Disassembly error: %v\n", err)
 		}
-
 	}
 
-	spec, err := ioutil.ReadFile(spec_file)
+	for i, platform := range sysZTests {
+		t.Run(platform.comment, func(t *testing.T) {
+			testSysZ(t, i, platform)
+		})
+	}
+
+	spec, err := os.ReadFile(spec_file)
 	if err != nil {
 		t.Errorf("Cannot read spec file %v: %v", spec_file, err)
 	}
 	if fs := final.String(); string(spec) != fs {
-		// fmt.Println(fs)
+		saveFile(t, spec_file+".test", fs)
 		t.Errorf("Output failed to match spec!")
 	} else {
 		t.Logf("Clean diff with %v.\n", spec_file)
 	}
 	final.Reset()
-
 }
