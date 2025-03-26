@@ -51,13 +51,13 @@ or http://www.capstone-engine.org
 Then, assuming you have set up your Go environment according to the docs, just:
 
 ```bash
-go get -u github.com/knightsc/gapstone
+go get -u github.com/bpfsnoop/gapstone
 ```
 
 Tests are provided. You should probably run them.
 
 ```
-cd $GOPATH/src/github.com/knightsc/gapstone
+cd $GOPATH/src/github.com/bpfsnoop/gapstone
 go test
 ```
 
@@ -71,7 +71,7 @@ Here's "Hello World":
 package main
 
 import (
-    "github.com/knightsc/gapstone"
+    "github.com/bpfsnoop/gapstone"
     "log"
 )
 
@@ -113,7 +113,7 @@ func main() {
 }
 ```
 
-Autodoc is available at http://godoc.org/github.com/knightsc/gapstone
+Autodoc is available at http://godoc.org/github.com/bpfsnoop/gapstone
 
 ## Contributing
 
