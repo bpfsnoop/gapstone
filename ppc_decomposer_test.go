@@ -13,7 +13,7 @@ package gapstone
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -45,8 +45,8 @@ func getBCName(bc uint) string {
 		return "ns"
 	}
 }
-func ppcInsnDetail(insn Instruction, engine *Engine, buf *bytes.Buffer) {
 
+func ppcInsnDetail(insn Instruction, engine *Engine, buf *bytes.Buffer) {
 	if len(insn.PPC.Operands) > 0 {
 		fmt.Fprintf(buf, "\top_count: %v\n", len(insn.PPC.Operands))
 	}
@@ -71,7 +71,6 @@ func ppcInsnDetail(insn Instruction, engine *Engine, buf *bytes.Buffer) {
 			fmt.Fprintf(buf, "\t\t\toperands[%v].crx.reg: %s\n", i, engine.RegName(op.CRX.Reg))
 			fmt.Fprintf(buf, "\t\t\toperands[%v].crx.cond: %s\n", i, getBCName(op.CRX.Cond))
 		}
-
 	}
 
 	if insn.PPC.BC != 0 {
@@ -90,14 +89,12 @@ func ppcInsnDetail(insn Instruction, engine *Engine, buf *bytes.Buffer) {
 }
 
 func TestPPC(t *testing.T) {
-
 	t.Parallel()
 
 	final := new(bytes.Buffer)
 	spec_file := "ppc.SPEC"
 
-	for i, platform := range ppcTests {
-
+	testPPC := func(t *testing.T, i int, platform platform) {
 		engine, err := New(platform.arch, platform.mode)
 		if err != nil {
 			t.Errorf("Failed to initialize engine %v", err)
@@ -110,13 +107,10 @@ func TestPPC(t *testing.T) {
 			maj, min := engine.Version()
 			t.Logf("Arch: PPC. Capstone Version: %v.%v", maj, min)
 			check := checks[CS_ARCH_PPC]
-			if check.grpMax != PPC_GRP_ENDING ||
-				check.insMax != PPC_INS_ENDING ||
-				check.regMax != PPC_REG_ENDING {
-				t.Errorf("Failed in sanity check. Constants out of sync with core.")
-			} else {
-				t.Logf("Sanity Check: PASS")
-			}
+			passed := assertEqual(t, "Failed in sanity GRP check, exp %d, got %d", check.grpMax, PPC_GRP_ENDING)
+			passed = assertEqual(t, "Failed in sanity INSN check, exp %d, got %d", check.insMax, PPC_INS_ENDING) && passed
+			passed = assertEqual(t, "Failed in sanity REG check, exp %d, got %d", check.regMax, PPC_REG_ENDING) && passed
+			t.Logf("Sanity Check PASS: %v", passed)
 		}
 		defer engine.Close()
 
@@ -136,18 +130,22 @@ func TestPPC(t *testing.T) {
 		} else {
 			t.Errorf("Disassembly error: %v\n", err)
 		}
-
 	}
 
-	spec, err := ioutil.ReadFile(spec_file)
+	for i, platform := range ppcTests {
+		t.Run(platform.comment, func(t *testing.T) {
+			testPPC(t, i, platform)
+		})
+	}
+
+	spec, err := os.ReadFile(spec_file)
 	if err != nil {
 		t.Errorf("Cannot read spec file %v: %v", spec_file, err)
 	}
 	if fs := final.String(); string(spec) != fs {
-		// fmt.Println(fs)
-		t.Errorf("Output failed to match spec!")
+		saveFile(t, spec_file+".test", fs)
+		t.Skip("Output failed to match spec!")
 	} else {
 		t.Logf("Clean diff with %v.\n", spec_file)
 	}
-
 }

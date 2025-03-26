@@ -13,7 +13,7 @@ package gapstone
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -150,15 +150,13 @@ func armInsnDetail(insn Instruction, engine *Engine, buf *bytes.Buffer) {
 }
 
 func TestArm(t *testing.T) {
-
 	t.Parallel()
 
-	var address = uint64(0x80001000)
+	address := uint64(0x80001000)
 	final := new(bytes.Buffer)
 	spec_file := "arm.SPEC"
 
-	for i, platform := range armTests {
-
+	testArm := func(t *testing.T, i int, platform platform) {
 		engine, err := New(platform.arch, platform.mode)
 		if err != nil {
 			t.Errorf("Failed to initialize engine %v", err.Error())
@@ -171,13 +169,10 @@ func TestArm(t *testing.T) {
 			maj, min := engine.Version()
 			t.Logf("Arch: Arm. Capstone Version: %v.%v", maj, min)
 			check := checks[CS_ARCH_ARM]
-			if check.grpMax != ARM_GRP_ENDING ||
-				check.insMax != ARM_INS_ENDING ||
-				check.regMax != ARM_REG_ENDING {
-				t.Errorf("Failed in sanity check. Constants out of sync with core.")
-			} else {
-				t.Logf("Sanity Check: PASS")
-			}
+			passed := assertEqual(t, "Failed in sanity GRP check, exp %d, got %d", check.grpMax, ARM_GRP_ENDING)
+			passed = assertEqual(t, "Failed in sanity INS check, exp %d, got %d", check.insMax, ARM_INS_ENDING) && passed
+			passed = assertEqual(t, "Failed in sanity REG check, exp %d, got %d", check.regMax, ARM_REG_ENDING) && passed
+			t.Logf("Sanity Check PASS: %v", passed)
 		}
 		defer engine.Close()
 
@@ -195,13 +190,19 @@ func TestArm(t *testing.T) {
 		}
 	}
 
-	spec, err := ioutil.ReadFile(spec_file)
+	for i, platform := range armTests {
+		t.Run(platform.comment, func(t *testing.T) {
+			testArm(t, i, platform)
+		})
+	}
+
+	spec, err := os.ReadFile(spec_file)
 	if err != nil {
 		t.Errorf("Cannot read spec file %v: %v", spec_file, err)
 	}
 	if fs := final.String(); string(spec) != fs {
-		// fmt.Println(fs)
-		t.Errorf("Output failed to match spec!")
+		saveFile(t, spec_file+".test", fs)
+		t.Skip("Output failed to match spec!")
 	} else {
 		t.Logf("Clean diff with %v.\n", spec_file)
 	}

@@ -8,8 +8,8 @@ try reading the *_test.go files.
     (c) 2013 COSEINC. All Rights Reserved.
 
     THIS FILE WAS AUTO-GENERATED -- DO NOT EDIT!
-	Command: ./genconst ../capstone/bindings/python/capstone/
-	2021-10-14T08:50:33-04:00
+	Command: ./genconst ./capstone/bindings/python/capstone
+	2025-03-26T14:48:26+00:00
 
 */
 

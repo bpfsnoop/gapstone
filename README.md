@@ -1,15 +1,14 @@
-gapstone
-====
+# gapstone
 
 Gapstone is a Go binding for the Capstone disassembly library.
 
-## CURRENT UPSTREAM VERSION: 4.0.2
-[![Build Status](https://travis-ci.org/knightsc/gapstone.svg?branch=master)](https://travis-ci.org/knightsc/gapstone)
+## CURRENT UPSTREAM VERSION: 5.0.6
+
+Currently, focus on x86.
 
 (head over to the next branch for the newest stuff)
 
-SUMMARY
-===
+# SUMMARY
 
 ( FROM THE CAPSTONE README )
 
@@ -34,7 +33,7 @@ Capstone offers some unparalleled features:
   or provided externally by the community).
 
 - Native support for all popular platforms: Windows, Mac OSX, iOS, Android,
-  Linux, *BSD, Solaris, etc.
+  Linux, \*BSD, Solaris, etc.
 
 - Thread-safe by design.
 
@@ -44,29 +43,30 @@ Capstone offers some unparalleled features:
 
 Further information is available at http://www.capstone-engine.org
 
-To install:
-----
+## To install:
 
 First install the capstone library from either https://github.com/aquynh/capstone
 or http://www.capstone-engine.org
 
 Then, assuming you have set up your Go environment according to the docs, just:
+
 ```bash
 go get -u github.com/knightsc/gapstone
 ```
 
 Tests are provided. You should probably run them.
+
 ```
 cd $GOPATH/src/github.com/knightsc/gapstone
 go test
 ```
 
-To start writing code:
-----
+## To start writing code:
 
-Take a look at the examples *_test.go
+Take a look at the examples \*\_test.go
 
 Here's "Hello World":
+
 ```go
 package main
 
@@ -115,7 +115,6 @@ func main() {
 
 Autodoc is available at http://godoc.org/github.com/knightsc/gapstone
 
-Contributing
-----
+## Contributing
 
 If you feel like chipping in, especially with better tests or examples, fork and send me a pull req.

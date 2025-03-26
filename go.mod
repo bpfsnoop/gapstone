@@ -1,3 +1,3 @@
-module github.com/knightsc/gapstone
+module github.com/bpfsnoop/gapstone
 
-go 1.13
+go 1.24

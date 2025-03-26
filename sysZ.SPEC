@@ -49,7 +49,7 @@ Disasm:
 0x1024:	ear	%r7, %a8
 	op_count: 2
 		operands[0].type: REG = 7
-		operands[1].type: ACREG = 8
+		operands[1].type: REG = a8
 
 0x1028:	clije	%r1, 0xc1, 0x1028
 	op_count: 3

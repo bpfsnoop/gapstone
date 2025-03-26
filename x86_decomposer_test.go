@@ -13,7 +13,7 @@ package gapstone
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -338,14 +338,12 @@ func x86InsnDetail(insn Instruction, engine *Engine, buf *bytes.Buffer) {
 }
 
 func TestX86(t *testing.T) {
-
 	t.Parallel()
 
 	final := new(bytes.Buffer)
 	spec_file := "x86.SPEC"
 
-	for i, platform := range x86Tests {
-
+	testX86 := func(t *testing.T, i int, platform platform) {
 		engine, err := New(platform.arch, platform.mode)
 		if err != nil {
 			t.Errorf("Failed to initialize engine %v", err)
@@ -358,13 +356,10 @@ func TestX86(t *testing.T) {
 			maj, min := engine.Version()
 			t.Logf("Arch: x86. Capstone Version: %v.%v", maj, min)
 			check := checks[CS_ARCH_X86]
-			if check.grpMax != X86_GRP_ENDING ||
-				check.insMax != X86_INS_ENDING ||
-				check.regMax != X86_REG_ENDING {
-				t.Errorf("Failed in sanity check. Constants out of sync with core.")
-			} else {
-				t.Logf("Sanity Check: PASS")
-			}
+			passed := assertEqual(t, "Failed in sanity GRP check, exp %d, got %d", check.grpMax, X86_GRP_ENDING)
+			passed = assertEqual(t, "Failed in sanity INS check, exp %d, got %d", check.insMax, X86_INS_ENDING) && passed
+			passed = assertEqual(t, "Failed in sanity REG check, exp %d, got %d", check.regMax, X86_REG_ENDING) && passed
+			t.Logf("Sanity Check PASS: %v", passed)
 		}
 		defer engine.Close()
 
@@ -384,18 +379,22 @@ func TestX86(t *testing.T) {
 		} else {
 			t.Errorf("Disassembly error: %v\n", err)
 		}
-
 	}
 
-	spec, err := ioutil.ReadFile(spec_file)
+	for i, platform := range x86Tests {
+		t.Run(platform.comment, func(t *testing.T) {
+			testX86(t, i, platform)
+		})
+	}
+
+	spec, err := os.ReadFile(spec_file)
 	if err != nil {
 		t.Errorf("Cannot read spec file %v: %v", spec_file, err)
 	}
 	if fs := final.String(); string(spec) != fs {
-		// fmt.Println(fs)
+		saveFile(t, spec_file+".test", fs)
 		t.Errorf("Output failed to match spec!")
 	} else {
 		t.Logf("Clean diff with %v.\n", spec_file)
 	}
-
 }

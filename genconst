@@ -50,6 +50,8 @@ pyfiles.each {|pyfn|
 		@clumping = false
 
 		File.foreach(pyfn) {|l|
+			# if line starts with 'import' or 'from . import', skip it
+			next if l =~ /^import|^from \./
 			case l
 			when /^#|^$/
 				# close any clump
@@ -70,7 +72,6 @@ pyfiles.each {|pyfn|
 		}
 
 		gofh.write(")\n\n") if @clumping
-		
 	}
 
 	# if all is well, this will nicely format all the files we just wrote. <3

@@ -1,3 +1,4 @@
+//go:build go1.7
 // +build go1.7
 
 /*
@@ -25,7 +26,7 @@ import (
 )
 
 // Disassemble a []byte full of opcodes.
-//   * address - Address of the first instruction in the given code buffer.
+//   - address - Address of the first instruction in the given code buffer.
 //
 // Underlying C resources are automatically free'd by this function.
 func (e *Engine) DisasmIter(input []byte, address uint64) <-chan Instruction {

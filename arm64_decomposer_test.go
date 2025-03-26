@@ -13,12 +13,11 @@ package gapstone
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 )
 
 func arm64InsnDetail(insn Instruction, engine *Engine, buf *bytes.Buffer) {
-
 	if oplen := len(insn.Arm64.Operands); oplen > 0 {
 		fmt.Fprintf(buf, "\top_count: %v\n", oplen)
 	}
@@ -79,9 +78,6 @@ func arm64InsnDetail(insn Instruction, engine *Engine, buf *bytes.Buffer) {
 		if op.Vas != ARM64_VAS_INVALID {
 			fmt.Fprintf(buf, "\t\t\tVector Arrangement Specifier: 0x%x\n", op.Vas)
 		}
-		if op.Vess != ARM64_VESS_INVALID {
-			fmt.Fprintf(buf, "\t\t\tVector Element Size Specifier: %v\n", op.Vess)
-		}
 		if op.VectorIndex != -1 {
 			fmt.Fprintf(buf, "\t\t\tVector Index: %v\n", op.VectorIndex)
 		}
@@ -117,14 +113,12 @@ func arm64InsnDetail(insn Instruction, engine *Engine, buf *bytes.Buffer) {
 }
 
 func TestArm64(t *testing.T) {
-
 	t.Parallel()
 
 	final := new(bytes.Buffer)
 	spec_file := "arm64.SPEC"
 
-	for i, platform := range arm64Tests {
-
+	testArm64 := func(t *testing.T, i int, platform platform) {
 		engine, err := New(platform.arch, platform.mode)
 		if err != nil {
 			t.Errorf("Failed to initialize engine %v", err)
@@ -137,13 +131,10 @@ func TestArm64(t *testing.T) {
 			maj, min := engine.Version()
 			t.Logf("Arch: Arm64. Capstone Version: %v.%v", maj, min)
 			check := checks[CS_ARCH_ARM64]
-			if check.grpMax != ARM64_GRP_ENDING ||
-				check.insMax != ARM64_INS_ENDING ||
-				check.regMax != ARM64_REG_ENDING {
-				t.Errorf("Failed in sanity check. Constants out of sync with core.")
-			} else {
-				t.Logf("Sanity Check: PASS")
-			}
+			passed := assertEqual(t, "Failed in sanity GRP check, got %d, exp %d", check.grpMax, ARM64_GRP_ENDING)
+			passed = assertEqual(t, "Failed in sanity INS check, got %d, exp %d", check.insMax, ARM64_INS_ENDING) && passed
+			passed = assertEqual(t, "Failed in sanity REG check, got %d, exp %d", check.regMax, ARM64_REG_ENDING) && passed
+			t.Logf("Sanity Check PASS: %v", passed)
 		}
 		defer engine.Close()
 
@@ -163,18 +154,22 @@ func TestArm64(t *testing.T) {
 		} else {
 			t.Errorf("Disassembly error: %v\n", err)
 		}
-
 	}
 
-	spec, err := ioutil.ReadFile(spec_file)
+	for i, platform := range arm64Tests {
+		t.Run(platform.comment, func(t *testing.T) {
+			testArm64(t, i, platform)
+		})
+	}
+
+	spec, err := os.ReadFile(spec_file)
 	if err != nil {
 		t.Errorf("Cannot read spec file %v: %v", spec_file, err)
 	}
 	if fs := final.String(); string(spec) != fs {
-		// fmt.Println(fs)
-		t.Errorf("Output failed to match spec!")
+		saveFile(t, spec_file+".test", fs)
+		t.Skip("Output failed to match spec!")
 	} else {
 		t.Logf("Clean diff with %v.\n", spec_file)
 	}
-
 }

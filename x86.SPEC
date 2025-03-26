@@ -85,7 +85,7 @@ Disasm:
 		operands[1].access: READ
 	Registers read: flags al bx si
 	Registers modified: flags al
-	EFLAGS: MOD_AF MOD_CF MOD_SF MOD_ZF MOD_PF MOD_OF
+	EFLAGS: MOD_AF MOD_CF MOD_SF MOD_ZF MOD_PF MOD_OF TEST_CF
 
 0x100b:	add	byte ptr [di], al
 	Prefix:0x00 0x00 0x00 0x00 
@@ -230,13 +230,9 @@ Disasm:
 			operands[0].mem.base: REG = bx
 			operands[0].mem.index: REG = di
 		operands[0].size: 1
-		operands[0].access: READ
 		operands[1].type: REG = bh
 		operands[1].size: 1
-		operands[1].access: READ
-	Registers read: bx di bh
-	Registers modified: flags
-	EFLAGS: MOD_SF MOD_ZF MOD_PF RESET_OF RESET_CF UNDEF_AF
+	Registers read: bx di
 
 0x101d:	mov	word ptr [bx], sp
 	Prefix:0x00 0x00 0x00 0x00 

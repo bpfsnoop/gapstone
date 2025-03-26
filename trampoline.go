@@ -24,6 +24,7 @@ import (
 
 // Because of a chicken and egg problem, this needs to be in a different file than
 // where it is used (engine.go), see https://github.com/golang/go/issues/9294.
+//
 //export trampoline
 func trampoline(buffer *C.uint8_t, buflen C.size_t, offset C.size_t, user_data unsafe.Pointer) C.size_t {
 	/*
