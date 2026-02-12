@@ -21,7 +21,7 @@ import (
 // Maintain the expected version and sanity checks manually, so we can verify
 // against the installed C lib. Not foolproof, but should save 90% of accidents
 const (
-	expectedMaj = 5
+	expectedMaj = 6
 	expectedMin = 0
 )
 
@@ -41,34 +41,34 @@ func (s *sanityChecks) Min() int { return expectedMin }
 // disassembly capstone expects to provide.
 var checks = sanityChecks{
 	CS_ARCH_ARM64: sanityCheck{
-		regMax: 342,
-		insMax: 1289,
-		grpMax: 156,
+		regMax: 703,
+		insMax: 1422,
+		grpMax: 254,
 	},
 	CS_ARCH_ARM: sanityCheck{
-		regMax: 111,
-		insMax: 472,
-		grpMax: 160,
+		regMax: 296,
+		insMax: 637,
+		grpMax: 195,
 	},
 	CS_ARCH_MIPS: sanityCheck{
-		regMax: 137,
-		insMax: 626,
-		grpMax: 161,
+		regMax: 635,
+		insMax: 1360,
+		grpMax: 184,
 	},
 	CS_ARCH_PPC: sanityCheck{
-		regMax: 344,
-		insMax: 1727,
-		grpMax: 143,
+		regMax: 580,
+		insMax: 1714,
+		grpMax: 158,
 	},
 	CS_ARCH_SPARC: sanityCheck{
-		regMax: 88,
-		insMax: 279,
-		grpMax: 135,
+		regMax: 238,
+		insMax: 290,
+		grpMax: 136,
 	},
 	CS_ARCH_SYSZ: sanityCheck{
-		regMax: 117,
-		insMax: 2346,
-		grpMax: 157,
+		regMax: 195,
+		insMax: 2500,
+		grpMax: 170,
 	},
 	CS_ARCH_X86: sanityCheck{
 		regMax: 246,

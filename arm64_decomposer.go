@@ -15,6 +15,7 @@ package gapstone
 // #cgo freebsd LDFLAGS: -L/usr/local/lib
 // #include <stdlib.h>
 // #include <capstone/capstone.h>
+// #include <capstone/arm64.h>
 import "C"
 
 // import "C" needs to be on its own line. cgo, amirite? XD
@@ -81,7 +82,7 @@ func fillArm64Header(raw C.cs_insn, insn *Instruction) {
 	arm64 := Arm64Instruction{
 		CC:          uint(cs_arm64.cc),
 		UpdateFlags: bool(cs_arm64.update_flags),
-		Writeback:   bool(cs_arm64.writeback),
+		Writeback:   bool(cs_arm64.post_index),
 	}
 
 	// Cast the op_info to a []C.cs_arm6464_op
@@ -118,21 +119,25 @@ func fillArm64Header(raw C.cs_insn, insn *Instruction) {
 			gop.FP = float64(*(*C.double)(unsafe.Pointer(&cop.anon0[0])))
 		case ARM64_OP_REG, ARM64_OP_REG_MRS, ARM64_OP_REG_MSR:
 			gop.Reg = uint(*(*C.uint)(unsafe.Pointer(&cop.anon0[0])))
-		case ARM64_OP_MEM:
-			cmop := (*C.arm64_op_mem)(unsafe.Pointer(&cop.anon0[0]))
+		case ARM64_OP_MEM, ARM64_OP_MEM_REG, ARM64_OP_MEM_IMM:
+			cmop := (*C.aarch64_op_mem)(unsafe.Pointer(&cop.anon0[0]))
 			gop.Mem = Arm64MemoryOperand{
 				Base:  uint(cmop.base),
 				Index: uint(cmop.index),
 				Disp:  int32(cmop.disp),
 			}
-		case ARM64_OP_PREFETCH:
-			gop.Prefetch = int(*(*C.int)(unsafe.Pointer(&cop.anon0[0])))
-		case ARM64_OP_PSTATE:
-			gop.PState = int(*(*C.int)(unsafe.Pointer(&cop.anon0[0])))
-		case ARM64_OP_BARRIER:
-			gop.Barrier = int(*(*C.int)(unsafe.Pointer(&cop.anon0[0])))
-		case ARM64_OP_SYS:
-			gop.Sys = uint(*(*C.uint)(unsafe.Pointer(&cop.anon0[0])))
+		case ARM64_OP_PRFM, ARM64_OP_SVEPRFM, ARM64_OP_RPRFM:
+			gop.Prefetch = int(*(*C.int)(unsafe.Pointer(&cop.sysop.alias)))
+		case ARM64_OP_PSTATEIMM0_15, ARM64_OP_PSTATEIMM0_1:
+			gop.PState = int(*(*C.int)(unsafe.Pointer(&cop.sysop.alias)))
+		case ARM64_OP_DB, ARM64_OP_ISB, ARM64_OP_TSB:
+			gop.Barrier = int(*(*C.int)(unsafe.Pointer(&cop.sysop.alias)))
+		case ARM64_OP_SYSREG:
+			gop.Sys = uint(*(*C.int)(unsafe.Pointer(&cop.sysop.reg)))
+		case ARM64_OP_SYSIMM:
+			gop.Sys = uint(*(*C.int)(unsafe.Pointer(&cop.sysop.imm)))
+		case ARM64_OP_SYSALIAS:
+			gop.Sys = uint(*(*C.int)(unsafe.Pointer(&cop.sysop.alias)))
 		}
 
 		arm64.Operands = append(arm64.Operands, gop)

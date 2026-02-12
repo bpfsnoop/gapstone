@@ -75,7 +75,6 @@ func (insn ArmInstruction) OpCount(optype uint) int {
 }
 
 func fillArmHeader(raw C.cs_insn, insn *Instruction) {
-
 	if raw.detail == nil {
 		return
 	}
@@ -91,7 +90,7 @@ func fillArmHeader(raw C.cs_insn, insn *Instruction) {
 		CPSFlag:     int(cs_arm.cps_flag),
 		CC:          uint(cs_arm.cc),
 		UpdateFlags: bool(cs_arm.update_flags),
-		Writeback:   bool(cs_arm.writeback),
+		Writeback:   bool(cs_arm.post_index),
 		MemBarrier:  int(cs_arm.mem_barrier),
 	}
 
@@ -120,12 +119,20 @@ func fillArmHeader(raw C.cs_insn, insn *Instruction) {
 		}
 		switch cop._type {
 		// fake a union by setting only the correct struct member
-		case ARM_OP_IMM, ARM_OP_CIMM, ARM_OP_PIMM:
+		case ARM_OP_IMM, ARM_OP_CIMM, ARM_OP_PIMM, ARM_OP_PRED:
 			gop.Imm = int32(*(*C.int32_t)(unsafe.Pointer(&cop.anon0[0])))
 		case ARM_OP_FP:
 			gop.FP = float64(*(*C.double)(unsafe.Pointer(&cop.anon0[0])))
-		case ARM_OP_REG, ARM_OP_SYSREG:
+		case ARM_OP_REG:
 			gop.Reg = uint(*(*C.uint)(unsafe.Pointer(&cop.anon0[0])))
+		case ARM_OP_SYSREG, ARM_OP_BANKEDREG:
+			gop.Reg = uint(*(*C.uint)(unsafe.Pointer(&cop.anon0[0])))
+		case ARM_OP_SPSR, ARM_OP_CPSR:
+			sysop := (*C.arm_sysop)(unsafe.Pointer(&cop.anon0[0]))
+			gop.Imm = int32(sysop.psr_bits)
+		case ARM_OP_SYSM:
+			sysop := (*C.arm_sysop)(unsafe.Pointer(&cop.anon0[0]))
+			gop.Imm = int32(sysop.sysm)
 		case ARM_OP_MEM:
 			cmop := (*C.arm_op_mem)(unsafe.Pointer(&cop.anon0[0]))
 			gop.Mem = ArmMemoryOperand{
@@ -133,7 +140,7 @@ func fillArmHeader(raw C.cs_insn, insn *Instruction) {
 				Index:  uint(cmop.index),
 				Scale:  int(cmop.scale),
 				Disp:   int(cmop.disp),
-				LShift: int(cmop.lshift),
+				LShift: int(cmop.align),
 			}
 		case ARM_OP_SETEND:
 			gop.Setend = int(*(*C.int)(unsafe.Pointer(&cop.anon0[0])))

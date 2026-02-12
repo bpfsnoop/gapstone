@@ -330,6 +330,8 @@ Disasm:
 	op_count: 1
 		operands[0].type: IMM = 0x10e7
 		operands[0].size: 4
+	Registers read: ip
+	Registers modified: ip
 
 0x102f:	jmp	word ptr [eax + 0x123]
 	Prefix:0x00 0x00 0x00 0x67 
@@ -348,6 +350,7 @@ Disasm:
 		operands[0].size: 2
 		operands[0].access: READ
 	Registers read: eax
+	Registers modified: ip
 
 0x1036:	call	0x1107
 	Prefix:0x00 0x00 0x66 0x00 
@@ -364,7 +367,7 @@ Disasm:
 		operands[0].type: IMM = 0x1107
 		operands[0].size: 4
 	Registers read: esp eip
-	Registers modified: esp
+	Registers modified: esp eip
 
 0x103c:	je	0x103a
 	Prefix:0x00 0x00 0x00 0x00 
@@ -380,7 +383,8 @@ Disasm:
 	op_count: 1
 		operands[0].type: IMM = 0x103a
 		operands[0].size: 2
-	Registers read: flags
+	Registers read: flags ip
+	Registers modified: ip
 	EFLAGS: TEST_ZF
 
 0x103e:
@@ -611,6 +615,8 @@ Disasm:
 	op_count: 1
 		operands[0].type: IMM = 0xdeadcf18
 		operands[0].size: 4
+	Registers read: eip
+	Registers modified: eip
 
 0x102e:	jmpl	*0x123(%eax)
 	Prefix:0x00 0x00 0x00 0x00 
@@ -630,6 +636,7 @@ Disasm:
 		operands[0].size: 4
 		operands[0].access: READ
 	Registers read: eax
+	Registers modified: eip
 
 0x1034:	calll	0xdeadcf18
 	Prefix:0x00 0x00 0x00 0x00 
@@ -647,7 +654,7 @@ Disasm:
 		operands[0].type: IMM = 0xdeadcf18
 		operands[0].size: 4
 	Registers read: esp eip
-	Registers modified: esp
+	Registers modified: esp eip
 
 0x1039:	je	0x103a
 	Prefix:0x00 0x00 0x00 0x00 
@@ -664,7 +671,8 @@ Disasm:
 	op_count: 1
 		operands[0].type: IMM = 0x103a
 		operands[0].size: 4
-	Registers read: eflags
+	Registers read: eflags eip
+	Registers modified: eip
 	EFLAGS: TEST_ZF
 
 0x103b:
@@ -895,6 +903,8 @@ Disasm:
 	op_count: 1
 		operands[0].type: IMM = 0xdeadcf18
 		operands[0].size: 4
+	Registers read: eip
+	Registers modified: eip
 
 0x102e:	jmp	dword ptr [eax + 0x123]
 	Prefix:0x00 0x00 0x00 0x00 
@@ -914,6 +924,7 @@ Disasm:
 		operands[0].size: 4
 		operands[0].access: READ
 	Registers read: eax
+	Registers modified: eip
 
 0x1034:	call	0xdeadcf18
 	Prefix:0x00 0x00 0x00 0x00 
@@ -931,7 +942,7 @@ Disasm:
 		operands[0].type: IMM = 0xdeadcf18
 		operands[0].size: 4
 	Registers read: esp eip
-	Registers modified: esp
+	Registers modified: esp eip
 
 0x1039:	je	0x103a
 	Prefix:0x00 0x00 0x00 0x00 
@@ -948,7 +959,8 @@ Disasm:
 	op_count: 1
 		operands[0].type: IMM = 0x103a
 		operands[0].size: 4
-	Registers read: eflags
+	Registers read: eflags eip
+	Registers modified: eip
 	EFLAGS: TEST_ZF
 
 0x103b:
@@ -1010,6 +1022,8 @@ Disasm:
 	op_count: 1
 		operands[0].type: IMM = 0xffffffffdeadcef7
 		operands[0].size: 8
+	Registers read: rip
+	Registers modified: rip
 
 0x100d:	jmp	qword ptr [rip + 0x123]
 	Prefix:0x00 0x00 0x00 0x00 
@@ -1029,6 +1043,7 @@ Disasm:
 		operands[0].size: 8
 		operands[0].access: READ
 	Registers read: rip
+	Registers modified: rip
 
 0x1013:	call	0xffffffffdeadcef7
 	Prefix:0x00 0x00 0x00 0x00 
@@ -1046,7 +1061,7 @@ Disasm:
 		operands[0].type: IMM = 0xffffffffdeadcef7
 		operands[0].size: 8
 	Registers read: rsp rip
-	Registers modified: rsp
+	Registers modified: rsp rip
 
 0x1018:	je	0x1019
 	Prefix:0x00 0x00 0x00 0x00 
@@ -1063,7 +1078,8 @@ Disasm:
 	op_count: 1
 		operands[0].type: IMM = 0x1019
 		operands[0].size: 8
-	Registers read: rflags
+	Registers read: rflags rip
+	Registers modified: rip
 	EFLAGS: TEST_ZF
 
 0x101a:

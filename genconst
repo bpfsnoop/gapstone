@@ -40,40 +40,107 @@ if pyfiles.empty?
 	fail "No *_const.py files found in #{ARGV[0]}"
 end
 
+def strip_inline_comment(value)
+	in_single = false
+	in_double = false
+	escaped = false
+	value.each_char.with_index do |ch, idx|
+		if escaped
+			escaped = false
+			next
+		end
+
+		if ch == '\\'
+			escaped = true
+			next
+		end
+
+		if ch == "'" && !in_double
+			in_single = !in_single
+			next
+		end
+
+		if ch == '"' && !in_single
+			in_double = !in_double
+			next
+		end
+
+		if ch == '#' && !in_single && !in_double
+			return value[0...idx].rstrip
+		end
+	end
+
+	value.rstrip
+end
+
 pyfiles.each {|pyfn|
 
 	gofn = "#{File.basename(pyfn).split('_').first}_constants.go"
+	source_pyfn = pyfn
+	rename_rules = []
 
-	File.open(gofn, 'w+') {|gofh|
+	case File.basename(pyfn)
+	when 'arm64_const.py'
+		source_pyfn = File.join(File.dirname(pyfn), 'aarch64_const.py')
+		rename_rules = [['AARCH64', 'ARM64'], ['AArch64CC', 'ARM64_CC']]
+	when 'sysz_const.py'
+		source_pyfn = File.join(File.dirname(pyfn), 'systemz_const.py')
+		rename_rules = [['SYSTEMZ', 'SYSZ']]
+	end
 
-		gofh.write prefix
-		@clumping = false
+	generated = String.new(prefix)
+	clumping = false
+	const_count = 0
+	seen = {}
 
-		File.foreach(pyfn) {|l|
-			# if line starts with 'import' or 'from . import', skip it
-			next if l =~ /^import|^from \./
-			case l
-			when /^#|^$/
-				# close any clump
-				gofh.write(")\n\n") if @clumping
-				@clumping = false
-				if l =~ /^#/
-					# Emit a go-style comment
-					gofh.write "#{l.sub('#', %q(//))}"
-				end
-			when /^[A-Z]/
-				gofh.puts("const (") unless @clumping
-				@clumping = true
-				const = l.split.first
-				gofh.puts "\t#{const} = C.#{const}"
-			else
-				fail "Weird line #{l}"
+	File.foreach(source_pyfn) {|l|
+		# if line starts with 'import' or 'from . import', skip it
+		next if l =~ /^import|^from \./
+		case l
+		when /^#|^$/
+			# close any clump
+			generated << ")\n\n" if clumping
+			clumping = false
+			if l =~ /^#/
+				# Emit a go-style comment
+				generated << "#{l.sub('#', %q(//))}"
 			end
-		}
-
-		gofh.write(")\n\n") if @clumping
+		when /^([A-Za-z][A-Za-z0-9_]*)\s*=\s*(.+)$/
+			const = $1
+			value = strip_inline_comment($2.strip)
+			rename_rules.each do |from, to|
+				const = const.gsub(from, to)
+				value = value.gsub(from, to)
+			end
+			next if value.empty?
+			if value.start_with?('{', '[')
+				generated << ")\n\n" if clumping
+				clumping = false
+				next
+			end
+			if seen[const]
+				next
+			end
+			seen[const] = true
+			generated << "const (\n" unless clumping
+			clumping = true
+			generated << "\t#{const} = #{value}\n"
+			const_count += 1
+		else
+			generated << ")\n\n" if clumping
+			clumping = false
+		end
 	}
 
+	generated << ")\n\n" if clumping
+
+	if const_count == 0
+		warn "Skipping #{pyfn}: no direct constants found"
+		next
+	end
+
+	File.open(gofn, 'w+') {|gofh| gofh.write(generated) }
+
 	# if all is well, this will nicely format all the files we just wrote. <3
-	`go fmt`
+	`go fmt #{gofn}`
 }

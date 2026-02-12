@@ -55,21 +55,20 @@ type SysZMemoryOperand struct {
 }
 
 func fillSysZHeader(raw C.cs_insn, insn *Instruction) {
-
 	if raw.detail == nil {
 		return
 	}
 
 	// Cast the cs_detail union
-	cs_sysz := (*C.cs_sysz)(unsafe.Pointer(&raw.detail.anon0[0]))
+	cs_sysz := (*C.cs_systemz)(unsafe.Pointer(&raw.detail.anon0[0]))
 
 	sysz := SysZInstruction{
 		CC:    uint(cs_sysz.cc),
 		OpCnt: uint8(cs_sysz.op_count),
 	}
 
-	// Cast the op_info to a []C.cs_sysz_op
-	var ops []C.cs_sysz_op
+	// Cast the op_info to a []C.cs_systemz_op
+	var ops []C.cs_systemz_op
 	oih := (*reflect.SliceHeader)(unsafe.Pointer(&ops))
 	oih.Data = uintptr(unsafe.Pointer(&cs_sysz.operands[0]))
 	oih.Len = int(cs_sysz.op_count)
@@ -89,10 +88,10 @@ func fillSysZHeader(raw C.cs_insn, insn *Instruction) {
 		// fake a union by setting only the correct struct member
 		case SYSZ_OP_IMM:
 			gop.Imm = int64(*(*C.int64_t)(unsafe.Pointer(&cop.anon0[0])))
-		case SYSZ_OP_REG, SYSZ_OP_ACREG:
+		case SYSZ_OP_REG:
 			gop.Reg = uint(*(*C.uint)(unsafe.Pointer(&cop.anon0[0])))
 		case SYSZ_OP_MEM:
-			cmop := (*C.sysz_op_mem)(unsafe.Pointer(&cop.anon0[0]))
+			cmop := (*C.systemz_op_mem)(unsafe.Pointer(&cop.anon0[0]))
 			gop.Mem = SysZMemoryOperand{
 				Base:   uint8(cmop.base),
 				Index:  uint8(cmop.index),

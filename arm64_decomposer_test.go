@@ -49,13 +49,13 @@ func arm64InsnDetail(insn Instruction, engine *Engine, buf *bytes.Buffer) {
 			fmt.Fprintf(buf, "\t\toperands[%v].type: REG_MRS = 0x%x\n", i, op.Reg)
 		case ARM64_OP_REG_MSR:
 			fmt.Fprintf(buf, "\t\toperands[%v].type: REG_MSR = 0x%x\n", i, op.Reg)
-		case ARM64_OP_PSTATE:
+		case ARM64_OP_PSTATEIMM0_15, ARM64_OP_PSTATEIMM0_1:
 			fmt.Fprintf(buf, "\t\toperands[%v].type: PSTATE = 0x%x\n", i, op.PState)
-		case ARM64_OP_SYS:
+		case ARM64_OP_SYSREG, ARM64_OP_SYSIMM, ARM64_OP_SYSALIAS:
 			fmt.Fprintf(buf, "\t\toperands[%v].type: SYS = 0x%x\n", i, op.Sys)
-		case ARM64_OP_PREFETCH:
+		case ARM64_OP_PRFM, ARM64_OP_SVEPRFM, ARM64_OP_RPRFM:
 			fmt.Fprintf(buf, "\t\toperands[%v].type: PREFETCH = 0x%x\n", i, op.Prefetch)
-		case ARM64_OP_BARRIER:
+		case ARM64_OP_DB, ARM64_OP_ISB, ARM64_OP_TSB:
 			fmt.Fprintf(buf, "\t\toperands[%v].type: BARRIER = 0x%x\n", i, op.Barrier)
 		}
 
@@ -75,7 +75,7 @@ func arm64InsnDetail(insn Instruction, engine *Engine, buf *bytes.Buffer) {
 		if op.Ext != ARM64_EXT_INVALID {
 			fmt.Fprintf(buf, "\t\t\tExt: %v\n", op.Ext)
 		}
-		if op.Vas != ARM64_VAS_INVALID {
+		if op.Vas != ARM64LAYOUT_INVALID {
 			fmt.Fprintf(buf, "\t\t\tVector Arrangement Specifier: 0x%x\n", op.Vas)
 		}
 		if op.VectorIndex != -1 {
@@ -89,7 +89,7 @@ func arm64InsnDetail(insn Instruction, engine *Engine, buf *bytes.Buffer) {
 	if insn.Arm64.Writeback {
 		fmt.Fprintf(buf, "\tWrite-back: True\n")
 	}
-	if insn.Arm64.CC != ARM64_CC_AL && insn.Arm64.CC != ARM64_CC_INVALID {
+	if insn.Arm64.CC != ARM64_CC_AL && insn.Arm64.CC != ARM64_CC_Invalid {
 		fmt.Fprintf(buf, "\tCode-condition: %v\n", insn.Arm64.CC)
 	}
 
@@ -168,7 +168,7 @@ func TestArm64(t *testing.T) {
 	}
 	if fs := final.String(); string(spec) != fs {
 		saveFile(t, spec_file+".test", fs)
-		t.Skip("Output failed to match spec!")
+		t.Errorf("Output failed to match spec!")
 	} else {
 		t.Logf("Clean diff with %v.\n", spec_file)
 	}

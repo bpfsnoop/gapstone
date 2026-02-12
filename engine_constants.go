@@ -20,12 +20,12 @@ import "C"
 const (
 	// Engine Architectures
 	CS_ARCH_ARM        = C.CS_ARCH_ARM        // ARM architecture (including Thumb Thumb-2)
-	CS_ARCH_ARM64      = C.CS_ARCH_ARM64      // ARM-64, also called AArch64
+	CS_ARCH_ARM64      = C.CS_ARCH_AARCH64    // ARM-64, also called AArch64
 	CS_ARCH_MIPS       = C.CS_ARCH_MIPS       // Mips architecture
 	CS_ARCH_X86        = C.CS_ARCH_X86        // X86 architecture (including x86 & x86-64)
 	CS_ARCH_PPC        = C.CS_ARCH_PPC        // PowerPC architecture
 	CS_ARCH_SPARC      = C.CS_ARCH_SPARC      // Sparc architecture
-	CS_ARCH_SYSZ       = C.CS_ARCH_SYSZ       // SystemZ architecture
+	CS_ARCH_SYSZ       = C.CS_ARCH_SYSTEMZ    // SystemZ architecture
 	CS_ARCH_XCORE      = C.CS_ARCH_XCORE      // Xcore architecture
 	CS_ARCH_M68K       = C.CS_ARCH_M68K       // 68K architecture
 	CS_ARCH_TMS320C64X = C.CS_ARCH_TMS320C64X // TMS320C64x architecture
@@ -122,8 +122,17 @@ const (
 	CS_OP_INVALID = C.CS_OP_INVALID // uninitialized/invalid operand.
 	CS_OP_REG     = C.CS_OP_REG     // Register operand.
 	CS_OP_IMM     = C.CS_OP_IMM     // Immediate operand.
-	CS_OP_MEM     = C.CS_OP_MEM     // Memory operand.
 	CS_OP_FP      = C.CS_OP_FP      // Floating-Point operand.
+	CS_OP_PRED    = C.CS_OP_PRED    // Predicate operand.
+	CS_OP_SPECIAL = C.CS_OP_SPECIAL // Architecture-specific/special operand.
+	CS_OP_MEM     = C.CS_OP_MEM     // Memory operand.
+	CS_OP_MEM_REG = C.CS_OP_MEM_REG // Memory operand referencing register.
+	CS_OP_MEM_IMM = C.CS_OP_MEM_IMM // Memory operand referencing immediate.
+)
+
+const (
+	UINT8_MAX  = 0xff
+	UINT16_MAX = 0xffff
 )
 
 // Common instruction operand access types - to be consistent across all architectures.

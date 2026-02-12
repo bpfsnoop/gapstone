@@ -3,19 +3,20 @@ Platform: ARM
 Code:0x86 0x48 0x60 0xf4 0x4d 0x0f 0xe2 0xf4 0xed 0xff 0xff 0xeb 0x04 0xe0 0x2d 0xe5 0x00 0x00 0x00 0x00 0xe0 0x83 0x22 0xe5 0xf1 0x02 0x03 0x0e 0x00 0x00 0xa0 0xe3 0x02 0x30 0xc1 0xe7 0x00 0x00 0x53 0xe3 0x00 0x02 0x01 0xf1 0x05 0x40 0xd0 0xe8 0xf4 0x80 0x00 0x00 
 Disasm:
 0x80001000:	vld2.32	{d20, d21}, [r0], r6
-	op_count: 4
+	op_count: 3
 		operands[0].type: REG = d20
 		operands[0].access: WRITE
 		operands[1].type: REG = d21
 		operands[1].access: WRITE
 		operands[2].type: MEM
 			operands[2].mem.base: REG = r0
+			operands[2].mem.index: REG = r6
+			operands[2].mem.scale: 0
 		operands[2].access: READ
-		operands[3].type: REG = r6
-		operands[3].access: READ
+	Write-back: True
 	Vector-size: 32
 	Registers read: r0 r6
-	Registers modified: d20 d21
+	Registers modified: r0 d20 d21
 
 0x80001004:	vld4.16	{d16[], d17[], d18[], d19[]}, [r2]!
 	op_count: 5
@@ -29,29 +30,32 @@ Disasm:
 		operands[3].access: WRITE
 		operands[4].type: MEM
 			operands[4].mem.base: REG = r2
+			operands[4].mem.scale: 0
 		operands[4].access: READ
-	Write-back: True
 	Vector-size: 16
 	Registers read: r2
-	Registers modified: d16 d17 d18 d19 r2
+	Registers modified: r2 d16 d17 d18 d19
 
-0x80001008:	bl	#0x80000fc4
+0x80001008:	bl	0x80000fc4
 	op_count: 1
 		operands[0].type: IMM = 0x80000fc4
-	Registers read: pc
-	Registers modified: lr pc
+		operands[0].access: READ
+	Code condition: 15
+	Registers read: r13
+	Registers modified: r14
 
 0x8000100c:	str	lr, [sp, #-4]!
 	op_count: 2
-		operands[0].type: REG = lr
+		operands[0].type: REG = r14
 		operands[0].access: READ
 		operands[1].type: MEM
-			operands[1].mem.base: REG = sp
-			operands[1].mem.disp: 0xfffffffc
+			operands[1].mem.base: REG = r13
+			operands[1].mem.scale: 0
+			operands[1].mem.disp: 0x4
 		operands[1].access: WRITE
-	Write-back: True
-	Registers read: lr sp
-	Registers modified: sp
+		Subtracted: True
+	Registers read: r14 r13
+	Registers modified: r13
 
 0x80001010:	andeq	r0, r0, r0
 	op_count: 3
@@ -61,8 +65,8 @@ Disasm:
 		operands[1].access: READ
 		operands[2].type: REG = r0
 		operands[2].access: READ
-	Code condition: 1
-	Registers read: r0
+	Code condition: 0
+	Registers read: cpsr r0
 	Registers modified: r0
 
 0x80001014:	str	r8, [r2, #-0x3e0]!
@@ -71,29 +75,36 @@ Disasm:
 		operands[0].access: READ
 		operands[1].type: MEM
 			operands[1].mem.base: REG = r2
-			operands[1].mem.disp: 0xfffffc20
+			operands[1].mem.scale: 0
+			operands[1].mem.disp: 0x3e0
 		operands[1].access: WRITE
-	Write-back: True
+		Subtracted: True
 	Registers read: r8 r2
 	Registers modified: r2
 
 0x80001018:	mcreq	p2, #0, r0, c3, c1, #7
 	op_count: 6
 		operands[0].type: P-IMM = 2
+		operands[0].access: READ
 		operands[1].type: IMM = 0x0
+		operands[1].access: READ
 		operands[2].type: REG = r0
 		operands[2].access: READ
 		operands[3].type: C-IMM = 3
+		operands[3].access: READ
 		operands[4].type: C-IMM = 1
+		operands[4].access: READ
 		operands[5].type: IMM = 0x7
-	Code condition: 1
-	Registers read: r0
+		operands[5].access: READ
+	Code condition: 0
+	Registers read: cpsr r0
 
 0x8000101c:	mov	r0, #0
 	op_count: 2
 		operands[0].type: REG = r0
 		operands[0].access: WRITE
 		operands[1].type: IMM = 0x0
+		operands[1].access: READ
 	Registers modified: r0
 
 0x80001020:	strb	r3, [r1, r2]
@@ -111,6 +122,7 @@ Disasm:
 		operands[0].type: REG = r3
 		operands[0].access: READ
 		operands[1].type: IMM = 0x0
+		operands[1].access: READ
 	Update-flags: True
 	Registers read: r3
 	Registers modified: cpsr
@@ -118,6 +130,7 @@ Disasm:
 0x80001028:	setend	be
 	op_count: 1
 		operands[0].type: SETEND = be
+	Code condition: 15
 
 0x8000102c:	ldm	r0, {r0, r2, lr} ^
 	op_count: 4
@@ -127,27 +140,26 @@ Disasm:
 		operands[1].access: WRITE
 		operands[2].type: REG = r2
 		operands[2].access: WRITE
-		operands[3].type: REG = lr
+		operands[3].type: REG = r14
 		operands[3].access: WRITE
-	User-mode: True
 	Registers read: r0
-	Registers modified: r0 r2 lr
+	Registers modified: r0 r2 r14
 
-0x80001030:	strdeq	r8, sb, [r0], -r4
-	op_count: 4
+0x80001030:	strdeq	r8, r9, [r0], -r4
+	op_count: 3
 		operands[0].type: REG = r8
 		operands[0].access: READ
-		operands[1].type: REG = sb
+		operands[1].type: REG = r9
 		operands[1].access: READ
 		operands[2].type: MEM
 			operands[2].mem.base: REG = r0
-		operands[2].access: READ
-		operands[3].type: REG = r4
-		operands[3].access: READ
+			operands[2].mem.index: REG = r4
+			operands[2].mem.scale: -1
+		operands[2].access: WRITE
 		Subtracted: True
-	Code condition: 1
+	Code condition: 0
 	Write-back: True
-	Registers read: r8 sb r0 r4
+	Registers read: cpsr r8 r9 r0 r4
 	Registers modified: r0
 
 0x80001034:
@@ -166,7 +178,8 @@ Disasm:
 		operands[2].access: WRITE
 		operands[3].type: MEM
 			operands[3].mem.base: REG = r0
-			operands[3].mem.disp: 0x40
+			operands[3].mem.scale: 0
+			operands[3].mem.lshift: 0x40
 		operands[3].access: READ
 	Vector-size: 8
 	Registers read: r0
@@ -176,52 +189,54 @@ Disasm:
 	op_count: 5
 		operands[0].type: REG = d16
 		operands[0].neon_lane = 1
-		operands[0].access: WRITE
+		operands[0].access: READ | WRITE
 		operands[1].type: REG = d17
 		operands[1].neon_lane = 1
-		operands[1].access: WRITE
+		operands[1].access: READ | WRITE
 		operands[2].type: REG = d18
 		operands[2].neon_lane = 1
-		operands[2].access: WRITE
+		operands[2].access: READ | WRITE
 		operands[3].type: REG = d19
 		operands[3].neon_lane = 1
-		operands[3].access: WRITE
+		operands[3].access: READ | WRITE
 		operands[4].type: MEM
 			operands[4].mem.base: REG = r0
+			operands[4].mem.scale: 0
 		operands[4].access: READ
 	Vector-size: 16
-	Registers read: r0
+	Registers read: d16 d17 d18 d19 r0
 	Registers modified: d16 d17 d18 d19
 
 0x80001008:	bx	lr
 	op_count: 1
-		operands[0].type: REG = lr
+		operands[0].type: REG = r14
 		operands[0].access: READ
-	Registers read: lr
-	Registers modified: pc
+	Registers read: r14
 
-0x8000100a:	blx	#0x8000102c
+0x8000100a:	blx	0x8000102c
 	op_count: 1
 		operands[0].type: IMM = 0x8000102c
-	Registers read: pc
-	Registers modified: lr pc
+		operands[0].access: READ
+	Registers read: r13
+	Registers modified: r14
 
-0x8000100e:	mov	fp, sp
+0x8000100e:	mov	r11, sp
 	op_count: 2
-		operands[0].type: REG = fp
+		operands[0].type: REG = r11
 		operands[0].access: WRITE
-		operands[1].type: REG = sp
+		operands[1].type: REG = r13
 		operands[1].access: READ
-	Registers read: sp
-	Registers modified: fp
+	Registers read: r13
+	Registers modified: r11
 
 0x80001010:	sub	sp, #0xc
 	op_count: 2
-		operands[0].type: REG = sp
+		operands[0].type: REG = r13
 		operands[0].access: READ | WRITE
 		operands[1].type: IMM = 0xc
-	Registers read: sp
-	Registers modified: sp
+		operands[1].access: READ
+	Registers read: r13
+	Registers modified: r13
 
 0x80001012:	ldr	r1, [r1, #0xc]
 	op_count: 2
@@ -229,35 +244,38 @@ Disasm:
 		operands[0].access: WRITE
 		operands[1].type: MEM
 			operands[1].mem.base: REG = r1
+			operands[1].mem.scale: 0
 			operands[1].mem.disp: 0xc
 		operands[1].access: READ
 	Registers read: r1
 	Registers modified: r1
 
-0x80001014:	cbz	r7, #0x8000101e
+0x80001014:	cbz	r7, 0x8000101e
 	op_count: 2
 		operands[0].type: REG = r7
 		operands[0].access: READ
 		operands[1].type: IMM = 0x8000101e
+		operands[1].access: READ
+	Code condition: 15
 	Registers read: r7
 
 0x80001016:	wfi	
 
 0x80001018:	cpsie.w	f
+	Code condition: 15
 	CPSI-mode: 2
 	CPSI-flag: 1
 
 0x8000101c:	ldr.w	pc, [r2, r3, lsl #2]
 	op_count: 2
-		operands[0].type: REG = pc
+		operands[0].type: REG = r15
 		operands[0].access: WRITE
 		operands[1].type: MEM
 			operands[1].mem.base: REG = r2
 			operands[1].mem.index: REG = r3
-		operands[1].access: READ
 			Shift: 2 = 2
 	Registers read: r2 r3
-	Registers modified: pc
+	Registers modified: r15
 
 0x80001020:
 
@@ -278,8 +296,9 @@ Disasm:
 		operands[0].type: REG = r4
 		operands[0].access: WRITE
 		operands[1].type: IMM = 0xf0
+		operands[1].access: READ
 	Update-flags: True
-	Registers modified: r4
+	Registers modified: cpsr r4
 
 0x80001006:	lsls	r4, r0, #0x1c
 	op_count: 3
@@ -288,18 +307,20 @@ Disasm:
 		operands[1].type: REG = r0
 		operands[1].access: READ
 		operands[2].type: IMM = 0x1c
+		operands[2].access: READ
 	Update-flags: True
 	Registers read: r0
-	Registers modified: r4
+	Registers modified: cpsr r4
 
 0x80001008:	subs	r4, #0x1f
 	op_count: 2
 		operands[0].type: REG = r4
 		operands[0].access: READ | WRITE
 		operands[1].type: IMM = 0x1f
+		operands[1].access: READ
 	Update-flags: True
 	Registers read: r4
-	Registers modified: r4
+	Registers modified: cpsr r4
 
 0x8000100a:	stm	r0!, {r1, r4, r5, r6, r7}
 	op_count: 6
@@ -315,7 +336,6 @@ Disasm:
 		operands[4].access: READ
 		operands[5].type: REG = r7
 		operands[5].access: READ
-	Write-back: True
 	Registers read: r0 r1 r4 r5 r6 r7
 	Registers modified: r0
 
@@ -325,6 +345,7 @@ Disasm:
 		operands[0].access: WRITE
 		operands[1].type: REG = r0
 		operands[1].access: READ
+	Code condition: 15
 	Update-flags: True
 	Registers read: r0
 	Registers modified: cpsr r0
@@ -334,6 +355,7 @@ Disasm:
 		operands[0].type: REG = r1
 		operands[0].access: WRITE
 		operands[1].type: IMM = 0x0
+		operands[1].access: READ
 	Registers modified: r1
 
 0x80001012:	ldr	r6, [r0, #0x44]
@@ -342,6 +364,7 @@ Disasm:
 		operands[0].access: WRITE
 		operands[1].type: MEM
 			operands[1].mem.base: REG = r0
+			operands[1].mem.scale: 0
 			operands[1].mem.disp: 0x44
 		operands[1].access: READ
 	Registers read: r0
@@ -358,6 +381,7 @@ Disasm:
 		operands[0].type: REG = r1
 		operands[0].access: WRITE
 		operands[1].type: IMM = 0x0
+		operands[1].access: READ
 	Registers modified: r1
 
 0x80001004:	pop.w	{r11, pc}
@@ -378,47 +402,57 @@ Disasm:
 	Registers read: r1 r0
 
 0x8000100c:	it	ne
-	Code condition: 2
+	Code condition: 1
+	Registers read: cpsr
 	Registers modified: itstate
 
 0x8000100e:	iteet	ge
-	Code condition: 11
+	Code condition: 10
+	Registers read: cpsr
 	Registers modified: itstate
 
-0x80001010:	vdupne.8	d16, d11[1]
+0x80001010:	vdupge.8	d16, d11[1]
 	op_count: 2
 		operands[0].type: REG = d16
 		operands[0].access: WRITE
 		operands[1].type: REG = d11
 		operands[1].access: READ
 		operands[1].vector_index = 1
-	Code condition: 2
+	Code condition: 10
 	Vector-size: 8
-	Registers read: d11
+	Registers read: cpsr d11
 	Registers modified: d16
 
-0x80001014:	msr	cpsr_fc, r6
+0x80001014:	msrlt	cpsr_fc, r6
 	op_count: 2
-		operands[0].type: SYSREG = 144
+		operands[0].access: WRITE
 		operands[1].type: REG = r6
 		operands[1].access: READ
-	Registers read: r6
+	Code condition: 11
+	Update-flags: True
+	Registers read: cpsr r6
+	Registers modified: cpsr
 
-0x80001018:	msr	apsr_nzcvqg, r0
+0x80001018:	msrlt	apsr_nzcvqg, r0
 	op_count: 2
-		operands[0].type: SYSREG = 259
+		operands[0].type: SYSREG = 3072
+		operands[0].access: WRITE
 		operands[1].type: REG = r0
 		operands[1].access: READ
-	Registers read: r0
+	Code condition: 11
+	Update-flags: True
+	Registers read: cpsr r0
+	Registers modified: cpsr
 
-0x8000101c:	sxtb.w	r6, r9, ror #8
+0x8000101c:	sxtbge.w	r6, r9, ror #8
 	op_count: 2
 		operands[0].type: REG = r6
 		operands[0].access: WRITE
 		operands[1].type: REG = r9
 		operands[1].access: READ
 			Shift: 4 = 8
-	Registers read: r9
+	Code condition: 10
+	Registers read: cpsr r9
 	Registers modified: r6
 
 0x80001020:	vaddw.u16	q8, q8, d18
@@ -443,7 +477,8 @@ Disasm:
 	op_count: 2
 		operands[0].type: REG = r0
 		operands[0].access: WRITE
-		operands[1].type: SYSREG = 264
+		operands[1].type: SYSREG = 2050
+		operands[1].access: READ
 	Registers modified: r0
 
 0x80001004:
@@ -458,7 +493,7 @@ Disasm:
 		operands[0].access: WRITE
 		operands[1].type: REG = s1
 		operands[1].access: READ
-	Vector-data: 18
+	Vector-data: 19
 	Registers read: s1
 	Registers modified: d3
 
@@ -470,11 +505,13 @@ Disasm:
 		operands[1].access: READ
 		operands[2].type: REG = r2
 		operands[2].access: READ
+	Code condition: 15
 	Registers read: r1 r2
 	Registers modified: r0
 
 0x80001008:	dmb	oshld
-	Memory-barrier: 2
+	Code condition: 15
+	Memory-barrier: 1
 
 0x8000100c:
 

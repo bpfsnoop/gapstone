@@ -46,7 +46,6 @@ type PPCOperand struct {
 	Reg  uint
 	Imm  int64
 	Mem  PPCMemoryOperand
-	CRX  PPCCRXOperand
 }
 
 type PPCMemoryOperand struct {
@@ -54,24 +53,21 @@ type PPCMemoryOperand struct {
 	Disp int
 }
 
-type PPCCRXOperand struct {
-	Scale uint
-	Reg   uint
-	Cond  uint
-}
-
 func fillPPCHeader(raw C.cs_insn, insn *Instruction) {
-
 	if raw.detail == nil {
 		return
 	}
 
 	// Cast the cs_detail union
 	cs_ppc := (*C.cs_ppc)(unsafe.Pointer(&raw.detail.anon0[0]))
+	bc := int(cs_ppc.bc.pred_cr)
+	if bc == int(PPC_PRED_INVALID) {
+		bc = int(cs_ppc.bc.pred_ctr)
+	}
 
 	ppc := PPCInstruction{
-		BC:        int(cs_ppc.bc),
-		BH:        int(cs_ppc.bh),
+		BC:        bc,
+		BH:        int(cs_ppc.bc.bh),
 		UpdateCR0: bool(cs_ppc.update_cr0),
 	}
 
@@ -104,14 +100,6 @@ func fillPPCHeader(raw C.cs_insn, insn *Instruction) {
 				Base: uint(cmop.base),
 				Disp: int(cmop.disp),
 			}
-		case PPC_OP_CRX:
-			ccrxop := (*C.ppc_op_crx)(unsafe.Pointer(&cop.anon0[0]))
-			gop.CRX = PPCCRXOperand{
-				Scale: uint(ccrxop.scale),
-				Reg:   uint(ccrxop.reg),
-				Cond:  uint(ccrxop.cond),
-			}
-
 		}
 
 		ppc.Operands = append(ppc.Operands, *gop)

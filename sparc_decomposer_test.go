@@ -18,7 +18,6 @@ import (
 )
 
 func sparcInsnDetail(insn Instruction, engine *Engine, buf *bytes.Buffer) {
-
 	if len(insn.Sparc.Operands) > 0 {
 		fmt.Fprintf(buf, "\top_count: %v\n", len(insn.Sparc.Operands))
 	}
@@ -43,7 +42,6 @@ func sparcInsnDetail(insn Instruction, engine *Engine, buf *bytes.Buffer) {
 				fmt.Fprintf(buf, "\t\t\toperands[%v].mem.disp: 0x%x\n", i, uint64(op.Mem.Disp))
 			}
 		}
-
 	}
 
 	if insn.Sparc.CC != 0 {
@@ -57,7 +55,6 @@ func sparcInsnDetail(insn Instruction, engine *Engine, buf *bytes.Buffer) {
 }
 
 func TestSparc(t *testing.T) {
-
 	t.Parallel()
 	final := new(bytes.Buffer)
 	spec_file := "sparc.SPEC"
@@ -111,10 +108,9 @@ func TestSparc(t *testing.T) {
 		t.Errorf("Cannot read spec file %v: %v", spec_file, err)
 	}
 	if fs := final.String(); string(spec) != fs {
-		// fmt.Println(fs)
+		saveFile(t, spec_file+".test", fs)
 		t.Errorf("Output failed to match spec!")
 	} else {
 		t.Logf("Clean diff with %v.\n", spec_file)
 	}
-
 }

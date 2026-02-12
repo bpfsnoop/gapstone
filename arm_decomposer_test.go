@@ -202,7 +202,7 @@ func TestArm(t *testing.T) {
 	}
 	if fs := final.String(); string(spec) != fs {
 		saveFile(t, spec_file+".test", fs)
-		t.Skip("Output failed to match spec!")
+		t.Errorf("Output failed to match spec!")
 	} else {
 		t.Logf("Clean diff with %v.\n", spec_file)
 	}

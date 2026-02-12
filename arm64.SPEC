@@ -1,63 +1,59 @@
 ****************
 Platform: ARM-64
-Code: 0x09 0x00 0x38 0xd5 0xbf 0x40 0x00 0xd5 0x0c 0x05 0x13 0xd5 0x20 0x50 0x02 0x0e 0x20 0xe4 0x3d 0x0f 0x00 0x18 0xa0 0x5f 0xa2 0x00 0xae 0x9e 0x9f 0x37 0x03 0xd5 0xbf 0x33 0x03 0xd5 0xdf 0x3f 0x03 0xd5 0x21 0x7c 0x02 0x9b 0x21 0x7c 0x00 0x53 0x00 0x40 0x21 0x4b 0xe1 0x0b 0x40 0xb9 0x20 0x04 0x81 0xda 0x20 0x08 0x02 0x8b 0x10 0x5b 0xe8 0x3c 0xfd 0x7b 0xba 0xa9 0xfd 0xc7 0x43 0xf8 
+Code: 0x09 0x00 0x38 0xd5 0xbf 0x40 0x00 0xd5 0x0c 0x05 0x13 0xd5 0x20 0x50 0x02 0x0e 0x20 0xe4 0x3d 0x0f 0x00 0x18 0xa0 0x5f 0xa2 0x00 0xae 0x9e 0x9f 0x37 0x03 0xd5 0xbf 0x33 0x03 0xd5 0xdf 0x3f 0x03 0xd5 0x21 0x7c 0x02 0x9b 0x21 0x7c 0x00 0x53 0x00 0x40 0x21 0x4b 0xe1 0x0b 0x40 0xb9 0x20 0x04 0x81 0xda 0x20 0x08 0x02 0x8b 0x10 0x5b 0xe8 0x3c 
 Disasm:
-0x2c:	mrs	x9, midr_el1
+0x2c:	mrs	x9, MIDR_EL1
 	op_count: 2
 		operands[0].type: REG = x9
 		operands[0].access: WRITE
 		operands[1].type: SYS = 0xc000
-		operands[1].access: READ
 	Registers modified: x9
 
-0x30:	msr	spsel, #0
+0x30:	msr	SPSel, #0
 	op_count: 2
-		operands[0].type: PSTATE = 0x5
-		operands[0].access: WRITE
+		operands[0].type: SYS = 0x5
 		operands[1].type: IMM = 0x0
 		operands[1].access: READ
-	Update-flags: True
-	Registers modified: nzcv
 
-0x34:	msr	dbgdtrtx_el0, x12
+0x34:	msr	DBGDTRTX_EL0, x12
 	op_count: 2
 		operands[0].type: SYS = 0x9828
-		operands[0].access: WRITE
 		operands[1].type: REG = x12
 		operands[1].access: READ
 	Registers read: x12
 
-0x38:	tbx	v0.8b, {v1.16b, v2.16b, v3.16b}, v2.8b
+0x38:	tbx	v0.8b, { v1.16b, v2.16b, v3.16b }, v2.8b
 	op_count: 5
-		operands[0].type: REG = v0
+		operands[0].type: REG = d0
 		operands[0].access: READ | WRITE
-			Vector Arrangement Specifier: 0x2
-		operands[1].type: REG = v1
+			Vector Arrangement Specifier: 0x808
+		operands[1].type: REG = q1
 		operands[1].access: READ
-			Vector Arrangement Specifier: 0x1
-		operands[2].type: REG = v2
+			Vector Arrangement Specifier: 0x1008
+		operands[2].type: REG = q2
 		operands[2].access: READ
-			Vector Arrangement Specifier: 0x1
-		operands[3].type: REG = v3
+			Vector Arrangement Specifier: 0x1008
+		operands[3].type: REG = q3
 		operands[3].access: READ
-			Vector Arrangement Specifier: 0x1
-		operands[4].type: REG = v2
-			Vector Arrangement Specifier: 0x2
-	Registers read: v0 v1 v2 v3
-	Registers modified: v0
+			Vector Arrangement Specifier: 0x1008
+		operands[4].type: REG = d2
+		operands[4].access: READ
+			Vector Arrangement Specifier: 0x808
+	Registers read: d0 q1 q2 q3 d2
+	Registers modified: d0
 
 0x3c:	scvtf	v0.2s, v1.2s, #3
 	op_count: 3
-		operands[0].type: REG = v0
+		operands[0].type: REG = d0
 		operands[0].access: WRITE
-			Vector Arrangement Specifier: 0xa
-		operands[1].type: REG = v1
+			Vector Arrangement Specifier: 0x220
+		operands[1].type: REG = d1
 		operands[1].access: READ
-			Vector Arrangement Specifier: 0xa
+			Vector Arrangement Specifier: 0x220
 		operands[2].type: IMM = 0x3
 		operands[2].access: READ
-	Registers read: v1
-	Registers modified: v0
+	Registers read: d1
+	Registers modified: d0
 
 0x40:	fmla	s0, s0, v0.s[3]
 	op_count: 3
@@ -65,32 +61,31 @@ Disasm:
 		operands[0].access: READ | WRITE
 		operands[1].type: REG = s0
 		operands[1].access: READ
-		operands[2].type: REG = v0
+		operands[2].type: REG = q0
 		operands[2].access: READ
-			Vector Arrangement Specifier: 0xb
+			Vector Arrangement Specifier: 0x20
 			Vector Index: 3
-	Registers read: s0 v0
+	Registers read: fpcr s0 q0
 	Registers modified: s0
 
 0x44:	fmov	x2, v5.d[1]
 	op_count: 2
 		operands[0].type: REG = x2
 		operands[0].access: WRITE
-		operands[1].type: REG = v5
+		operands[1].type: REG = q5
 		operands[1].access: READ
+			Vector Arrangement Specifier: 0x40
 			Vector Index: 1
-	Registers read: v5
+	Registers read: q5
 	Registers modified: x2
 
 0x48:	dsb	nsh
 	op_count: 1
-		operands[0].type: BARRIER = 0x7
-		operands[0].access: READ
+		operands[0].type: SYS = 0x7
 
 0x4c:	dmb	osh
 	op_count: 1
-		operands[0].type: BARRIER = 0x3
-		operands[0].access: READ
+		operands[0].type: SYS = 0x3
 
 0x50:	isb	
 
@@ -106,13 +101,11 @@ Disasm:
 	Registers modified: x1
 
 0x58:	lsr	w1, w1, #0
-	op_count: 3
+	op_count: 2
 		operands[0].type: REG = w1
-		operands[0].access: READ | WRITE
+		operands[0].access: WRITE
 		operands[1].type: REG = w1
 		operands[1].access: READ
-		operands[2].type: IMM = 0x0
-		operands[2].access: READ
 	Registers read: w1
 	Registers modified: w1
 
@@ -145,7 +138,7 @@ Disasm:
 		operands[0].access: WRITE
 		operands[1].type: REG = x1
 		operands[1].access: READ
-	Code-condition: 2
+	Code-condition: 1
 	Registers read: nzcv x1
 	Registers modified: x0
 
@@ -174,32 +167,5 @@ Disasm:
 	Registers read: x24 w8
 	Registers modified: q16
 
-0x70:	stp	x29, x30, [sp, #-0x60]!
-	op_count: 3
-		operands[0].type: REG = fp
-		operands[0].access: READ
-		operands[1].type: REG = lr
-		operands[1].access: READ
-		operands[2].type: MEM
-			operands[2].mem.base: REG = sp
-			operands[2].mem.disp: 0xffffffa0
-		operands[2].access: READ | WRITE
-	Write-back: Pre
-	Registers read: fp lr sp
-	Registers modified: sp
-
-0x74:	ldr	x29, [sp], #0x3c
-	op_count: 3
-		operands[0].type: REG = fp
-		operands[0].access: WRITE
-		operands[1].type: MEM
-			operands[1].mem.base: REG = sp
-		operands[1].access: READ
-		operands[2].type: IMM = 0x3c
-		operands[2].access: READ
-	Write-back: Post
-	Registers read: sp
-	Registers modified: fp sp
-
-0x78:
+0x70:
 

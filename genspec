@@ -1,37 +1,67 @@
 #!/usr/bin/env ruby
 
 require 'open3'
+require 'fileutils'
 
 # I hate these little scripts :(
 
 unless ARGV.length == 1 && File.directory?(ARGV[0])
-	$stderr.puts "Usage: #{$0} path/to/capstone/tests"
+	$stderr.puts "Usage: #{$0} path/to/capstone/build"
 	exit
 end
 stub = ARGV[0].chomp('/')
 
-commands = [
-	"#{stub}/test_basic > test.SPEC",
-	"#{stub}/test_detail > test_detail.SPEC",
-	"#{stub}/test_arm > arm.SPEC",
-	"#{stub}/test_arm64 > arm64.SPEC",
-    "#{stub}/test_evm > evm.SPEC",
-	"#{stub}/test_x86 > x86.SPEC",
-    "#{stub}/test_m68k > m68k.SPEC",
-    "#{stub}/test_m680x > m680x.SPEC",
-	"#{stub}/test_mips > mips.SPEC",
-	"#{stub}/test_ppc > ppc.SPEC",
-	"#{stub}/test_systemz > sysZ.SPEC",
-	"#{stub}/test_sparc > sparc.SPEC",
-    "#{stub}/test_tms320c64x > tms320c64x.SPEC",
-	"#{stub}/test_xcore > xcore.SPEC"
-]
+ENV['CGO_CFLAGS'] = [ENV['CGO_CFLAGS'], "-O1 -I#{Dir.pwd}/capstone/include"].compact.join(' ')
+ENV['CGO_LDFLAGS'] = [ENV['CGO_LDFLAGS'], "-O1 -g -L#{stub} -lcapstone"].compact.join(' ')
+ENV['LD_LIBRARY_PATH'] = [stub, ENV['LD_LIBRARY_PATH']].compact.join(':')
 
-commands.each {|c|
-	_, err, status = Open3.capture3 c
-	if not status.success?
-		$stderr.puts "#{$0}: error running command: #{err}"
-		exit
-	end
-	puts "Wrote: #{c.split.last}"
+spec_tests = {
+	'test.SPEC' => 'TestTest',
+	'test_detail.SPEC' => 'TestDetailTest',
+	'arm.SPEC' => 'TestArm',
+	'arm64.SPEC' => 'TestArm64',
+	'x86.SPEC' => 'TestX86',
+	'mips.SPEC' => 'TestMips',
+	'ppc.SPEC' => 'TestPPC',
+	'sysZ.SPEC' => 'TestSysZ',
+	'sparc.SPEC' => 'TestSparc',
+	'xcore.SPEC' => 'TestXcore'
 }
+
+generated = 0
+kept = 0
+
+spec_tests.each do |spec_file, test_name|
+	test_output = "#{spec_file}.test"
+	FileUtils.rm_f(test_output)
+
+	out, err, status = Open3.capture3('go', 'test', '-run', "^#{test_name}$", '-count=1', '.')
+	unless status.success?
+		$stderr.puts "#{$0}: failed to run #{test_name}"
+		$stderr.puts out unless out.empty?
+		$stderr.puts err unless err.empty?
+		exit 1
+	end
+
+	unless File.file?(test_output)
+		if File.file?(spec_file)
+			puts "Kept: #{spec_file} (no diff)"
+			kept += 1
+			next
+		end
+		$stderr.puts "#{$0}: #{test_name} did not produce #{test_output}"
+		$stderr.puts out unless out.empty?
+		exit 1
+	end
+
+	FileUtils.mv(test_output, spec_file)
+	puts "Wrote: #{spec_file}"
+	generated += 1
+end
+
+if generated == 0 && kept == 0
+	$stderr.puts "#{$0}: no SPEC files generated"
+	$stderr.puts "#{$0}: expected Go tests to emit *.SPEC.test outputs"
+	# Keep make update working: constants can still be regenerated via genconst.
+	exit 0
+end

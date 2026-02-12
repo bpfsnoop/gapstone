@@ -18,7 +18,6 @@ import (
 )
 
 func mipsInsnDetail(insn Instruction, engine *Engine, buf *bytes.Buffer) {
-
 	if len(insn.Mips.Operands) > 0 {
 		fmt.Fprintf(buf, "\top_count: %v\n", len(insn.Mips.Operands))
 	}
@@ -39,14 +38,12 @@ func mipsInsnDetail(insn Instruction, engine *Engine, buf *bytes.Buffer) {
 				fmt.Fprintf(buf, "\t\t\toperands[%v].mem.disp: 0x%x\n", i, uint64(op.Mem.Disp))
 			}
 		}
-
 	}
 
 	fmt.Fprintf(buf, "\n")
 }
 
 func TestMips(t *testing.T) {
-
 	t.Parallel()
 
 	final := new(bytes.Buffer)
@@ -100,10 +97,9 @@ func TestMips(t *testing.T) {
 		t.Errorf("Cannot read spec file %v: %v", spec_file, err)
 	}
 	if fs := final.String(); string(spec) != fs {
-		// fmt.Println(fs)
+		saveFile(t, spec_file+".test", fs)
 		t.Errorf("Output failed to match spec!")
 	} else {
 		t.Logf("Clean diff with %v.\n", spec_file)
 	}
-
 }

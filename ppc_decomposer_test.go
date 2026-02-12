@@ -21,28 +21,24 @@ func getBCName(bc uint) string {
 	switch bc {
 	default:
 		return ""
-	case PPC_BC_INVALID:
+	case PPC_PRED_INVALID:
 		return "invalid"
-	case PPC_BC_LT:
+	case PPC_PRED_LT:
 		return "lt"
-	case PPC_BC_LE:
+	case PPC_PRED_LE:
 		return "le"
-	case PPC_BC_EQ:
+	case PPC_PRED_EQ:
 		return "eq"
-	case PPC_BC_GE:
+	case PPC_PRED_GE:
 		return "ge"
-	case PPC_BC_GT:
+	case PPC_PRED_GT:
 		return "gt"
-	case PPC_BC_NE:
+	case PPC_PRED_NE:
 		return "ne"
-	case PPC_BC_UN:
+	case PPC_PRED_UN:
 		return "un"
-	case PPC_BC_NU:
+	case PPC_PRED_NU:
 		return "nu"
-	case PPC_BC_SO:
-		return "so"
-	case PPC_BC_NS:
-		return "ns"
 	}
 }
 
@@ -65,11 +61,6 @@ func ppcInsnDetail(insn Instruction, engine *Engine, buf *bytes.Buffer) {
 			if op.Mem.Disp != 0 {
 				fmt.Fprintf(buf, "\t\t\toperands[%v].mem.disp: 0x%x\n", i, uint64(op.Mem.Disp))
 			}
-		case PPC_OP_CRX:
-			fmt.Fprintf(buf, "\t\toperands[%v].type: CRX\n", i)
-			fmt.Fprintf(buf, "\t\t\toperands[%v].crx.scale: %d\n", i, uint(op.CRX.Scale))
-			fmt.Fprintf(buf, "\t\t\toperands[%v].crx.reg: %s\n", i, engine.RegName(op.CRX.Reg))
-			fmt.Fprintf(buf, "\t\t\toperands[%v].crx.cond: %s\n", i, getBCName(op.CRX.Cond))
 		}
 	}
 
@@ -144,7 +135,7 @@ func TestPPC(t *testing.T) {
 	}
 	if fs := final.String(); string(spec) != fs {
 		saveFile(t, spec_file+".test", fs)
-		t.Skip("Output failed to match spec!")
+		t.Errorf("Output failed to match spec!")
 	} else {
 		t.Logf("Clean diff with %v.\n", spec_file)
 	}

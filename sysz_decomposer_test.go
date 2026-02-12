@@ -26,8 +26,6 @@ func sysZInsnDetail(insn Instruction, engine *Engine, buf *bytes.Buffer) {
 		switch op.Type {
 		case SYSZ_OP_REG:
 			fmt.Fprintf(buf, "\t\toperands[%v].type: REG = %v\n", i, engine.RegName(op.Reg))
-		case SYSZ_OP_ACREG:
-			fmt.Fprintf(buf, "\t\toperands[%v].type: ACREG = %v\n", i, op.Reg)
 		case SYSZ_OP_IMM:
 			fmt.Fprintf(buf, "\t\toperands[%v].type: IMM = 0x%x\n", i, (uint64(op.Imm)))
 		case SYSZ_OP_MEM:
